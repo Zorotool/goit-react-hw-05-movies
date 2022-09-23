@@ -1,73 +1,35 @@
-import React, { Component } from 'react';
-import ContactsList from './contactsList/ContactsList';
-import ContactForm from './Form/Form';
-import Filter from './Filter/Filter';
-import { Title, ContactsListTitle } from './Phonebook.styled';
+import { Routes, Route } from "react-router-dom";
+import { lazy } from "react";
+import Layout from "./Layout/Layout";
 
-class App extends Component {
-  state = {
-    contacts: [
-      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
-    filter: '',
-  };
+const createAsyncView = componentName => {
+  return lazy(() => {
+    return import(`views/${componentName}/${componentName}`)
+  })
+};
 
-  componentDidMount() {
-    const contacts = localStorage.getItem('contacts');
-    const parsedContacts = JSON.parse(contacts);
-    if (parsedContacts) {
-      this.setState({contacts: parsedContacts})
-    }
-  }; 
-  
-  componentDidUpdate(prevProps, prevState) {
-      if (prevState !== this.state) {
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts))
-    };    
-  };
+const HomeView = createAsyncView('HomeView');
+const MoviesView = createAsyncView('MoviesView');
+const MovieDetailsView = createAsyncView('MovieDetailsView');
+const NotFoundView = createAsyncView('NotFoundView');
+const Cast = createAsyncView('Cast');
+const Reviews = createAsyncView('Reviews');
 
-  searchByName = e => {
-    this.setState({ filter: e.currentTarget.value });
-  };
-
-  addContact = newContact => {
-    const { contacts } = this.state;
-    if (contacts.find(item => item.name === newContact.name)) {
-      alert(`${newContact.name} is allready in contacts. `);
-    } else {
-      this.setState({contacts:[...contacts, newContact]})
-    };
-  };
-
-  deleteContact = e => {
-    const id = e.currentTarget.dataset.id;
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== id),
-    }));
-  };
-
-  render() {
-    const { contacts, filter } = this.state;
-    const visibleContacts = contacts.filter(({ name }) =>
-      name.toLowerCase().includes(filter.toLowerCase())
-    );
-
-    return (
-      <>
-        <Title>Phonebook</Title>
-        <ContactForm addContact={this.addContact} />
-        <ContactsListTitle>Contacts</ContactsListTitle>
-        <Filter searchByName={this.searchByName} />
-        <ContactsList
-          phoneList={visibleContacts}
-          deleteContact={this.deleteContact}
-        />
-      </>
-    );
-  }
-}
+function App() {
+  return (    
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<HomeView/>}/>        
+          <Route path="movies" element={<MoviesView />} />
+          <Route path="movies/:movieId" element={<MovieDetailsView />} >
+          <Route path="cast" element={<Cast />} />
+          <Route path="reviews" element={<Reviews/>} />
+          </Route>
+          <Route path="*" element={<NotFoundView/>} />
+        </Route>
+      </Routes>  
+    
+  );
+};
 
 export default App;
