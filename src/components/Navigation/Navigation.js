@@ -7,6 +7,7 @@ function Navigation() {
       <NavLink
         to="/"
         className={({ isActive }) => (isActive ? styles.active : styles.link)}
+        end = {true}
       >
         Home
       </NavLink>
